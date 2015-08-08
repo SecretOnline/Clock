@@ -10,3 +10,6 @@ body {
   position: relative;
   top: calc(50vh - 2.5em);
 }
+.clock sub {
+  vertical-align: baseline;
+}
