@@ -4,6 +4,46 @@
   font-weight: normal;
   font-style: normal;
 }
+header {
+  -webkit-app-region: drag;
+  height: 30px;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, .1);
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+header ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  float: right;
+}
+header li {
+  display: inline-block;
+}
+header button {
+  -webkit-app-region: no-drag;
+  padding: 0;
+  transition: background-color 0.2s ease-out;
+  border: none;
+  background-color: transparent;
+  background-image: none;
+  height: 30px;
+  width: 30px;
+}
+header button:hover {
+  background-color: rgba(255, 255, 255, .1);
+}
+header button:active {
+  background-color: rgba(255, 255, 255, .2);
+}
+header .close:hover {
+  background-color: #f00;
+}
+header .close:active {
+  background-color: #f33;
+}
 body {
   font-family: geosanslight,'Open Sans', Helvetica, Verdana, Arial, sans-serif;
   transition: background-color 10s ease-in-out;

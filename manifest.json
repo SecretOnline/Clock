@@ -4,7 +4,7 @@
   "name": "Clock",
   "short_name": "Clock",
   "description": "An extremely simple clock",
-  "version": "0.3",
+  "version": "0.4",
   "app": {
     "background": {
       "scripts": ["chrome.js"]
