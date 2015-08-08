@@ -1,5 +1,11 @@
+@font-face {
+  font-family: 'geosanslight';
+  src: url("fonts/GeosansLight.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
 body {
-  font-family: 'Open Sans', Helvetica, Verdana, Arial, sans-serif;
+  font-family: geosanslight,'Open Sans', Helvetica, Verdana, Arial, sans-serif;
   transition: background-color 10s ease-in-out;
 }
 .clock {
