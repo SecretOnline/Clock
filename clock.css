@@ -9,13 +9,14 @@ body {
   transition: background-color 10s ease-in-out;
 }
 .clock {
-  color: white;
-  font-family: 'Roboto Mono', monospace;
   font-size: 100px;
   font-weight: 300;
+  margin-bottom: 0;
+}
+main {
+  color: white;
   text-align: center;
-  position: relative;
-  top: calc(50vh - 2.5em);
+  vertical-align: middle;
 }
 .clock sub {
   vertical-align: baseline;
