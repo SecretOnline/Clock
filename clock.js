@@ -19,6 +19,10 @@
     var now = new Date(Date.now());
 
     clock.innerHTML = toTimeString(now);
+
+    var body = document.querySelector('body');
+    if (body.style.backgroundColor != colors[now.getHours()])
+      body.style.backgroundColor = colors[now.getHours()];
   }
 
   function toTimeString(time) {
