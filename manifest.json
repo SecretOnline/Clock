@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+
+  "name": "Clock",
+  "short_name": "Clock",
+  "description": "An extremely simple clock",
+  "version": "0.2",
+  "app": {
+    "background": {
+      "scripts": ["chrome.js"]
+    }
+  }
+}
