@@ -87,14 +87,14 @@
           if (items.theme)
             changeTheme(items.theme);
           else
-            changeTheme('aosp');
+            changeTheme('plain');
         });
         return;
       }
     }
 
     if (!(themeName || currentTheme || themes[currentTheme]))
-      themeName = 'aosp';
+      themeName = 'plain';
 
     currentTheme = themeName;
 
@@ -115,7 +115,7 @@
     dropdown.classList.add('dropdown');
     dropdown.innerHTML = '<h2>Themes</h2>';
     if (!chrome.storage)
-      dropdown.innerHTML += '<p>Custom themes are available if you use the Chrome App</p>';
+      dropdown.innerHTML += '<p>Custom themes, and saved settings, are available if you use the Chrome App</p>';
     dropdown.innerHTML += '<ul></ul>';
     var themeList = dropdown.querySelector('ul');
 
@@ -184,6 +184,13 @@
       text: '#000',
       background: [
         '#fff'
+      ]
+    },
+    invert: {
+      name: 'White on Dark Grey',
+      text: '#fff',
+      background: [
+        '#222'
       ]
     }
   };

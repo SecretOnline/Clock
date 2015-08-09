@@ -4,6 +4,13 @@
   font-weight: normal;
   font-style: normal;
 }
+body {
+  font-family: geosanslight,'Open Sans', Helvetica, Verdana, Arial, sans-serif;
+  text-align: center;
+}
+body.transition {
+  transition: background-color 10s ease-in-out;
+}
 header {
   -webkit-app-region: drag;
   height: 30px;
@@ -45,13 +52,6 @@ header .close:hover {
 header .close:active {
   background-color: #f33;
 }
-body {
-  font-family: geosanslight,'Open Sans', Helvetica, Verdana, Arial, sans-serif;
-  text-align: center;
-}
-body.transition {
-  transition: background-color 10s ease-in-out;
-}
 .clock {
   font-size: 100px;
   font-weight: 300;
@@ -69,15 +69,15 @@ main {
   top: 0;
   left: 0;
   width: 100vw;
-  padding-top: 30px;
-  border-bottom: 1px solid #ccc;
+  padding: 30px 0;
+  border-bottom: 1px solid #aaa;
 }
 .dropdown ul {
   list-style: none;
   padding: 0;
-  margin: 0 0 30px;
   display: inline-block;
   min-width: 50vw;
+  border: 1px solid #aaa;
 }
 .dropdown li {
   padding: 5px;
