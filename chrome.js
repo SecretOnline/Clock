@@ -4,6 +4,8 @@ chrome.app.runtime.onLaunched.addListener(function() {
   }, function(newWin) {
     var doc = newWin.contentWindow.document;
     newWin.contentWindow.addEventListener('load', function() {
+
+      // Add minimize + close buttons to header
       var headerUl = doc.querySelector('header ul');
 
       var closeButton = doc.createElement('button');

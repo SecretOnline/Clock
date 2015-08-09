@@ -9,5 +9,8 @@
     "background": {
       "scripts": ["chrome.js"]
     }
-  }
+  },
+  "permissions": [
+    "storage"
+  ]
 }

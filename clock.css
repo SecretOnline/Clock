@@ -12,6 +12,7 @@ header {
   position: absolute;
   right: 0;
   top: 0;
+  z-index: 2;
 }
 header ul {
   list-style: none;
@@ -39,13 +40,16 @@ header button:active {
   background-color: rgba(255, 255, 255, .2);
 }
 header .close:hover {
-  background-color: #f00;
+  background-color: #f11;
 }
 header .close:active {
   background-color: #f33;
 }
 body {
   font-family: geosanslight,'Open Sans', Helvetica, Verdana, Arial, sans-serif;
+  text-align: center;
+}
+body.transition {
   transition: background-color 10s ease-in-out;
 }
 .clock {
@@ -54,9 +58,27 @@ body {
   margin-bottom: 0;
 }
 main {
-  text-align: center;
   vertical-align: middle;
 }
 .clock sub {
   vertical-align: baseline;
+}
+.dropdown {
+  background-color: white;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  padding-top: 30px;
+  border-bottom: 1px solid #ccc;
+}
+.dropdown ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 30px;
+  display: inline-block;
+  min-width: 50vw;
+}
+.dropdown li {
+  padding: 5px;
 }

@@ -3,6 +3,7 @@
     changeTheme();
     updateClock();
     updateDate();
+    document.querySelector('button.themes').addEventListener('click', showThemesDropdown);
   }
 
   function millisUntilMin() {
@@ -21,8 +22,13 @@
     var clock = document.querySelector('.clock');
     var now = new Date();
     clock.innerHTML = toTimeString(now);
-    updateTheme();
 
+    var body = document.querySelector('body');
+    body.classList.add('transition');
+    updateTheme();
+    setTimeout(function() {
+      body.classList.remove('transition');
+    }, 10000);
     setTimeout(updateClock, millisUntilMin());
   }
 
@@ -35,12 +41,23 @@
   }
 
   function updateTheme() {
-    var body = document.querySelector('body');
-    var main = document.querySelector('main');
-    var now = new Date();
-    var bgIndex = Math.floor(themes[currentTheme].background.length * (((now.getHours() * 60) + now.getMinutes()) / 1440));
-    body.style.backgroundColor = themes[currentTheme].background[bgIndex];
-    main.style.color = themes[currentTheme].text;
+    if (currentTheme) {
+      var body = document.querySelector('body');
+      var main = document.querySelector('main');
+      body.style.backgroundColor = getThemeBackground();
+      main.style.color = themes[currentTheme].text;
+    }
+  }
+
+  function getThemeBackground(theme, time) {
+    if (!theme)
+      theme = currentTheme;
+    if (!time)
+      time = Date.now();
+
+    var now = new Date(time);
+    var bgIndex = Math.floor(themes[theme].background.length * (((now.getHours() * 60) + now.getMinutes()) / 1440));
+    return themes[theme].background[bgIndex];
   }
 
   function toTimeString(time) {
@@ -62,11 +79,70 @@
   }
 
   function changeTheme(themeName) {
+    document.querySelector('body').classList.remove('transition');
+    // If theme not set yet, try getting out of storage
+    if (!(currentTheme || themeName)) {
+      if (chrome.storage) {
+        chrome.storage.local.get('theme', function(items) {
+          if (items.theme)
+            changeTheme(items.theme);
+          else
+            changeTheme('aosp');
+        });
+        return;
+      }
+    }
+
     if (!(themeName || currentTheme || themes[currentTheme]))
       themeName = 'aosp';
 
     currentTheme = themeName;
-    document.cookie = 'theme=' + encodeURIComponent(currentTheme) + ';expires=' + new Date();
+
+    if (chrome.storage) {
+      chrome.storage.local.set({
+        'theme': currentTheme
+      });
+    }
+
+    updateTheme();
+  }
+
+  function showThemesDropdown() {
+    if (hideThemesDropdown())
+      return;
+
+    var dropdown = document.createElement('div');
+    dropdown.classList.add('dropdown');
+    dropdown.innerHTML = '<h2>Themes</h2>';
+    if (!chrome.storage)
+      dropdown.innerHTML += '<p>Custom themes are available if you use the Chrome App</p>';
+    dropdown.innerHTML += '<ul></ul>';
+    var themeList = dropdown.querySelector('ul');
+
+    Object.keys(themes).forEach(function(key) {
+      var theme = themes[key];
+      var themeEl = document.createElement('li');
+      themeEl.style.backgroundColor = getThemeBackground(key);
+      themeEl.style.color = theme.text;
+      themeEl.innerHTML = theme.name;
+
+      themeEl.addEventListener('click', function() {
+        changeTheme(key);
+        hideThemesDropdown();
+      });
+
+      themeList.appendChild(themeEl);
+    });
+
+    document.querySelector('body').appendChild(dropdown);
+  }
+
+  function hideThemesDropdown() {
+    var dropdown = document.querySelector('div.dropdown');
+    if (dropdown) {
+      dropdown.parentNode.removeChild(dropdown);
+      return true;
+    }
   }
 
   // Default to Android clock (for now)
