@@ -66,6 +66,15 @@
     return themeObj.background[bgIndex];
   }
 
+  function getThemeText(theme) {
+    if (!theme)
+      theme = currentTheme;
+
+    var themeObj = themes[theme] || customThemes[theme];
+
+    return themeObj.text;
+  }
+
   function toTimeString(time) {
     var hours = time.getHours().toString();
     if (hours > 12)
