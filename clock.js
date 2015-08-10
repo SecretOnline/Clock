@@ -28,7 +28,7 @@
     try {
       updateTheme();
     } catch (ex) {
-      console.error('error updating theme');
+      console.warn('Unable to update theme. Was it deleted?');
     }
     setTimeout(function() {
       body.classList.remove('transition');
@@ -125,7 +125,7 @@
   }
 
   function showThemesDropdown() {
-    if (hideThemesDropdown())
+    if (hideDropdown())
       return;
 
     var dropdown = document.createElement('div');
@@ -145,8 +145,12 @@
       themeEl.innerHTML = theme.name;
 
       themeEl.addEventListener('click', function() {
-        changeTheme(key);
-        hideThemesDropdown();
+        try {
+          changeTheme(key);
+        } catch (ex) {
+          console.warn('Unable to change theme. Was it deleted?');
+        }
+        hideDropdown();
       });
 
       return themeEl;
@@ -166,7 +170,7 @@
             chrome.storage.local.set({
               'customThemes': customThemes
             }, function() {
-              hideThemesDropdown();
+              hideDropdown();
               showThemesDropdown();
             });
           }
@@ -175,20 +179,61 @@
       });
 
       var newTheme = document.createElement('li');
-      newTheme.addEventListener('click', function() {
-        //soon
-      });
+      newTheme.innerHTML = 'Create new theme';
+      newTheme.addEventListener('click', showNewThemeDropdown);
+      themeList.appendChild(newTheme);
     }
 
     document.querySelector('body').appendChild(dropdown);
   }
 
-  function hideThemesDropdown() {
+  function hideDropdown() {
     var dropdown = document.querySelector('div.dropdown');
     if (dropdown) {
       dropdown.parentNode.removeChild(dropdown);
       return true;
     }
+  }
+
+  function showNewThemeDropdown() {
+    hideDropdown();
+
+    var dropdown = document.createElement('div');
+    dropdown.classList.add('dropdown');
+    dropdown.innerHTML = '<h2>New Theme</h2>';
+    if (!chrome.storage)
+      dropdown.innerHTML += '<p>Changes made here may have no effect if you\'re using a web browser.</p>';
+
+    dropdown.innerHTML += '<p>Theme name: <input type="text" class="name"></p><p>Text color: <input type="text" class="color"></p><p>Background color: <input type="text" class="bgcolor"></p>';
+
+
+    dropdown.innerHTML += '<ul></ul>';
+    var optionList = dropdown.querySelector('ul');
+
+    var cancel = document.createElement('li');
+    cancel.innerHTML = 'Cancel';
+    cancel.addEventListener('click', hideDropdown);
+    optionList.appendChild(cancel);
+
+    var create = document.createElement('li');
+    create.innerHTML = 'Create Theme';
+    create.addEventListener('click', function() {
+      var id = Math.floor(Math.random() * 10000);
+      customThemes[id] = {
+        name: dropdown.querySelector('.name').value,
+        text: dropdown.querySelector('.color').value,
+        background: [dropdown.querySelector('.bgcolor').value]
+      };
+      chrome.storage.local.set({
+        'customThemes': customThemes
+      }, function() {
+        hideDropdown();
+        changeTheme(id);
+      });
+    });
+    optionList.appendChild(create);
+
+    document.querySelector('body').appendChild(dropdown);
   }
 
   // Default to Android clock (for now)

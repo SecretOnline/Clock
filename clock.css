@@ -40,6 +40,7 @@ header button,
   background-image: none;
   height: 30px;
   width: 30px;
+  cursor: pointer;
 }
 header button:hover,
 .dropdown li button:hover {
@@ -84,6 +85,7 @@ main {
 }
 .dropdown li {
   padding: 5px;
+  cursor: pointer;
 }
 .dropdown li button,
 .dropdown li img {
