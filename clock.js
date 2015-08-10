@@ -153,14 +153,12 @@
         var removeButton = themeEl.querySelector('button');
         removeButton.addEventListener('click', function() {
           delete customThemes[key];
-          console.log('foo');
           if (chrome.storage) {
             chrome.storage.local.set({
               'customThemes': customThemes
             }, function() {
               hideThemesDropdown();
               showThemesDropdown();
-              console.log('bar');
             });
           }
         });
