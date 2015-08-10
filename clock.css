@@ -30,7 +30,8 @@ header ul {
 header li {
   display: inline-block;
 }
-header button {
+header button,
+.dropdown li button {
   -webkit-app-region: no-drag;
   padding: 0;
   transition: background-color 0.2s ease-out;
@@ -40,10 +41,12 @@ header button {
   height: 30px;
   width: 30px;
 }
-header button:hover {
+header button:hover,
+.dropdown li button:hover {
   background-color: rgba(255, 255, 255, .1);
 }
-header button:active {
+header button:active,
+.dropdown li button:active {
   background-color: rgba(255, 255, 255, .2);
 }
 header .close:hover {
@@ -81,4 +84,10 @@ main {
 }
 .dropdown li {
   padding: 5px;
+}
+.dropdown li button,
+.dropdown li img {
+  height: 1em;
+  width: 1em;
+  float: right;
 }

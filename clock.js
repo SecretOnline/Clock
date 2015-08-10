@@ -25,7 +25,11 @@
 
     var body = document.querySelector('body');
     body.classList.add('transition');
-    updateTheme();
+    try {
+      updateTheme();
+    } catch (ex) {
+      console.error('error updating theme');
+    }
     setTimeout(function() {
       body.classList.remove('transition');
     }, 10000);
@@ -45,7 +49,7 @@
       var body = document.querySelector('body');
       var main = document.querySelector('main');
       body.style.backgroundColor = getThemeBackground();
-      main.style.color = themes[currentTheme].text;
+      main.style.color = getThemeText();
     }
   }
 
@@ -55,9 +59,11 @@
     if (!time)
       time = Date.now();
 
+    var themeObj = themes[theme] || customThemes[theme];
+
     var now = new Date(time);
-    var bgIndex = Math.floor(themes[theme].background.length * (((now.getHours() * 60) + now.getMinutes()) / 1440));
-    return themes[theme].background[bgIndex];
+    var bgIndex = Math.floor(themeObj.background.length * (((now.getHours() * 60) + now.getMinutes()) / 1440));
+    return themeObj.background[bgIndex];
   }
 
   function toTimeString(time) {
@@ -83,7 +89,9 @@
     // If theme not set yet, try getting out of storage
     if (!(currentTheme || themeName)) {
       if (chrome.storage) {
-        chrome.storage.local.get('theme', function(items) {
+        chrome.storage.local.get(['theme', 'customThemes'], function(items) {
+          if (items.customThemes)
+            customThemes = items.customThemes;
           if (items.theme)
             changeTheme(items.theme);
           else
@@ -93,7 +101,7 @@
       }
     }
 
-    if (!(themeName || currentTheme || themes[currentTheme]))
+    if (!(themeName || currentTheme || themes[currentTheme] || customThemes[currentTheme]))
       themeName = 'plain';
 
     currentTheme = themeName;
@@ -119,8 +127,9 @@
     dropdown.innerHTML += '<ul></ul>';
     var themeList = dropdown.querySelector('ul');
 
-    Object.keys(themes).forEach(function(key) {
-      var theme = themes[key];
+    function addToDropdownList(key) {
+      var theme = themes[key] || customThemes[key];
+
       var themeEl = document.createElement('li');
       themeEl.style.backgroundColor = getThemeBackground(key);
       themeEl.style.color = theme.text;
@@ -131,8 +140,38 @@
         hideThemesDropdown();
       });
 
-      themeList.appendChild(themeEl);
+      return themeEl;
+    }
+
+    Object.keys(themes).forEach(function(key) {
+      themeList.appendChild(addToDropdownList(key));
     });
+    if (chrome.storage) {
+      Object.keys(customThemes).forEach(function(key) {
+        var themeEl = addToDropdownList(key);
+        themeEl.innerHTML += '<button class="delete"><img src="res/delete.svg" alt="Remove" /></button>';
+        var removeButton = themeEl.querySelector('button');
+        removeButton.addEventListener('click', function() {
+          delete customThemes[key];
+          console.log('foo');
+          if (chrome.storage) {
+            chrome.storage.local.set({
+              'customThemes': customThemes
+            }, function() {
+              hideThemesDropdown();
+              showThemesDropdown();
+              console.log('bar');
+            });
+          }
+        });
+        themeList.appendChild(themeEl);
+      });
+
+      var newTheme = document.createElement('li');
+      newTheme.addEventListener('click', function() {
+        //soon
+      });
+    }
 
     document.querySelector('body').appendChild(dropdown);
   }
@@ -148,6 +187,7 @@
   // Default to Android clock (for now)
   var currentTheme;
   // Themes!
+  var customThemes;
   var themes = {
     aosp: {
       name: 'Android Clock',
