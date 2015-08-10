@@ -215,6 +215,11 @@
     cancel.addEventListener('click', hideDropdown);
     optionList.appendChild(cancel);
 
+    var byJSON = document.createElement('li');
+    byJSON.innerHTML = 'Advanced Input';
+    byJSON.addEventListener('click', showJSONDropdown);
+    optionList.appendChild(byJSON);
+
     var create = document.createElement('li');
     create.innerHTML = 'Create Theme';
     create.addEventListener('click', function() {
@@ -224,6 +229,42 @@
         text: dropdown.querySelector('.color').value,
         background: [dropdown.querySelector('.bgcolor').value]
       };
+      chrome.storage.local.set({
+        'customThemes': customThemes
+      }, function() {
+        hideDropdown();
+        changeTheme(id);
+      });
+    });
+    optionList.appendChild(create);
+
+    document.querySelector('body').appendChild(dropdown);
+  }
+
+  function showJSONDropdown() {
+    hideDropdown();
+
+    var dropdown = document.createElement('div');
+    dropdown.classList.add('dropdown');
+    dropdown.innerHTML = '<h2>New Theme</h2>';
+    dropdown.innerHTML += '<p>Very little error checking happens here.<br>If you use this input, it is assumed you know what you are doing.</p>';
+
+    dropdown.innerHTML += '<p>JSON:</p><p><input type="text" class="json"></p>';
+
+
+    dropdown.innerHTML += '<ul></ul>';
+    var optionList = dropdown.querySelector('ul');
+
+    var cancel = document.createElement('li');
+    cancel.innerHTML = 'Cancel';
+    cancel.addEventListener('click', showNewThemeDropdown);
+    optionList.appendChild(cancel);
+
+    var create = document.createElement('li');
+    create.innerHTML = 'Create Theme';
+    create.addEventListener('click', function() {
+      var id = Math.floor(Math.random() * 10000);
+      customThemes[id] = JSON.parse(dropdown.querySelector('.json').value);
       chrome.storage.local.set({
         'customThemes': customThemes
       }, function() {
