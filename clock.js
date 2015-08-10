@@ -194,7 +194,7 @@
   // Default to Android clock (for now)
   var currentTheme;
   // Themes!
-  var customThemes;
+  var customThemes = {};
   var themes = {
     aosp: {
       name: 'Android Clock',
