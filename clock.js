@@ -169,30 +169,31 @@
     Object.keys(themes).forEach(function(key) {
       themeList.appendChild(addToDropdownList(key));
     });
-    if (chrome.storage) {
-      Object.keys(customThemes).forEach(function(key) {
-        var themeEl = addToDropdownList(key);
-        themeEl.innerHTML += '<button class="delete"><img src="res/delete.svg" alt="Remove" /></button>';
-        var removeButton = themeEl.querySelector('button');
-        removeButton.addEventListener('click', function() {
-          delete customThemes[key];
-          if (chrome.storage) {
-            chrome.storage.local.set({
-              'customThemes': customThemes
-            }, function() {
-              hideDropdown();
-              showThemesDropdown();
-            });
-          }
-        });
-        themeList.appendChild(themeEl);
+    Object.keys(customThemes).forEach(function(key) {
+      var themeEl = addToDropdownList(key);
+      themeEl.innerHTML += '<button class="delete"><img src="res/delete.svg" alt="Remove" /></button>';
+      var removeButton = themeEl.querySelector('button');
+      removeButton.addEventListener('click', function() {
+        delete customThemes[key];
+        if (chrome.storage) {
+          chrome.storage.local.set({
+            'customThemes': customThemes
+          }, function() {
+            hideDropdown();
+            showThemesDropdown();
+          });
+        } else {
+          hideDropdown();
+          showThemesDropdown();
+        }
       });
+      themeList.appendChild(themeEl);
+    });
 
-      var newTheme = document.createElement('li');
-      newTheme.innerHTML = 'Create new theme';
-      newTheme.addEventListener('click', showNewThemeDropdown);
-      themeList.appendChild(newTheme);
-    }
+    var newTheme = document.createElement('li');
+    newTheme.innerHTML = 'Create new theme';
+    newTheme.addEventListener('click', showNewThemeDropdown);
+    themeList.appendChild(newTheme);
 
     document.querySelector('body').appendChild(dropdown);
   }
@@ -212,7 +213,7 @@
     dropdown.classList.add('dropdown');
     dropdown.innerHTML = '<h2>New Theme</h2>';
     if (!chrome.storage)
-      dropdown.innerHTML += '<p>Changes made here may have no effect if you\'re using a web browser.</p>';
+      dropdown.innerHTML += '<p><strong>Changes made here may have no effect if you\'re using a web browser.</strong></p>';
 
     dropdown.innerHTML += '<p>Colors must be in a valid CSS format. Some examples can be found on the <a href="https://developer.mozilla.org/en/docs/Web/CSS/color_value#Color_keywords">Mozilla Developer Network</a></p>';
     dropdown.innerHTML += '<p>Theme name: <input type="text" class="name"></p><p>Text color: <input type="text" class="color"></p><p>Background color: <input type="text" class="bgcolor"></p>';
@@ -240,12 +241,17 @@
         text: dropdown.querySelector('.color').value,
         background: [dropdown.querySelector('.bgcolor').value]
       };
-      chrome.storage.local.set({
-        'customThemes': customThemes
-      }, function() {
+      if (chrome.storage)
+        chrome.storage.local.set({
+          'customThemes': customThemes
+        }, function() {
+          hideDropdown();
+          changeTheme(id);
+        });
+      else {
         hideDropdown();
         changeTheme(id);
-      });
+      }
     });
     optionList.appendChild(create);
 
@@ -276,19 +282,24 @@
     create.addEventListener('click', function() {
       var id = Math.floor(Math.random() * 10000);
       customThemes[id] = JSON.parse(dropdown.querySelector('.json').value);
-      chrome.storage.local.set({
-        'customThemes': customThemes
-      }, function() {
+      if (chrome.storage)
+        chrome.storage.local.set({
+          'customThemes': customThemes
+        }, function() {
+          hideDropdown();
+          changeTheme(id);
+        });
+      else {
+
         hideDropdown();
         changeTheme(id);
-      });
+      }
     });
     optionList.appendChild(create);
 
     document.querySelector('body').appendChild(dropdown);
   }
 
-  // Default to Android clock (for now)
   var currentTheme;
   // Themes!
   var customThemes = {};
