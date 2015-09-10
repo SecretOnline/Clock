@@ -75,6 +75,15 @@
     return themeObj.text;
   }
 
+  function getThemeFont(theme) {
+    if (!theme)
+      theme = currentTheme;
+
+    var themeObj = themes[theme] || customThemes[theme];
+
+    return themeObj.font || '';
+  }
+
   function toTimeString(time) {
     var hours = time.getHours().toString();
     if (hours > 12)
@@ -132,7 +141,7 @@
     dropdown.classList.add('dropdown');
     dropdown.innerHTML = '<h2>Themes</h2>';
     if (!chrome.storage)
-      dropdown.innerHTML += '<p>Custom themes, and saved settings, are available if you use the Chrome App</p>';
+      dropdown.innerHTML += '<p>Custom themes, and saved settings, are available if you use the Chrome App</p><p>Currently the only way to get it is to clone via GitHub, and add it yourself in the Extensions settings page</p>';
     dropdown.innerHTML += '<ul></ul>';
     var themeList = dropdown.querySelector('ul');
 
@@ -143,6 +152,7 @@
       themeEl.style.backgroundColor = getThemeBackground(key);
       themeEl.style.color = theme.text;
       themeEl.innerHTML = theme.name;
+      themeEl.style.fontFamily = getThemeFont(key);
 
       themeEl.addEventListener('click', function() {
         try {
@@ -204,6 +214,7 @@
     if (!chrome.storage)
       dropdown.innerHTML += '<p>Changes made here may have no effect if you\'re using a web browser.</p>';
 
+    dropdown.innerHTML += '<p>Colors must be in a valid CSS format. Some examples can be found on the <a href="https://developer.mozilla.org/en/docs/Web/CSS/color_value#Color_keywords">Mozilla Developer Network</a></p>';
     dropdown.innerHTML += '<p>Theme name: <input type="text" class="name"></p><p>Text color: <input type="text" class="color"></p><p>Background color: <input type="text" class="bgcolor"></p>';
 
 
