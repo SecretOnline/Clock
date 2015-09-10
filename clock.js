@@ -5,7 +5,8 @@
   function initClock() {
     // Set theme and clock information
     changeTheme();
-    updateClock();
+    updateMinute();
+    updateHour();
     updateDate();
 
     // Add click handlers
@@ -22,6 +23,15 @@
   }
 
   /**
+   * Returns the number of milliseconds until the next hour
+   */
+  function millisUntilHour() {
+    var now = new Date();
+    var nextHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1);
+    return nextHour.getTime() - Date.now();
+  }
+
+  /**
    * Returns the number of milliseconds until the next day
    */
   function millisUntilDay() {
@@ -33,15 +43,13 @@
   /**
    * Updates the time displayed
    */
-  function updateClock() {
+  function updateMinute() {
     // Update time
-    var clock = document.querySelector('.clock');
-    var now = new Date();
-    clock.innerHTML = toTimeString(now);
-
-    // Turn on transitions
-    var body = document.querySelector('body');
-    body.classList.add('transition');
+    var minute = document.querySelector('.clock .minute');
+    var mins = new Date().getMinutes().toString();
+    if (mins < 10)
+      mins = '0' + mins;
+    minute.textContent = mins;
 
     // Update theme
     // Make sure theme still exists
@@ -51,13 +59,26 @@
       console.warn('Unable to update theme. Was it deleted?');
     }
 
-    // Remove transition class after 10 seconds
-    setTimeout(function() {
-      body.classList.remove('transition');
-    }, 10000);
-
     // Set clock to update mext minute
-    setTimeout(updateClock, millisUntilMin());
+    setTimeout(updateMinute, millisUntilMin());
+  }
+
+  function updateHour() {
+    // Update time
+    var hour = document.querySelector('.clock .hour');
+    var hrs = new Date().getHours().toString();
+    if (hrs > 12)
+      hrs = hrs % 12;
+    if (hrs < 10)
+      hrs = '0' + hrs;
+    hour.textContent = hrs;
+
+    var indicator = document.querySelector('.clock sub');
+    var amPm = new Date().getHours() % 12 == new Date().getHours() ? 'am' : 'pm';
+    indicator.textContent = amPm;
+
+    // Set clock to update mext hour
+    setTimeout(updateHour, millisUntilHour());
   }
 
   /**
@@ -67,7 +88,7 @@
     // Update date text
     var date = document.querySelector('.date');
     var now = new Date();
-    date.innerHTML = toDateString(now);
+    date.innerHTML = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()];
 
     // Schedule next update
     setTimeout(updateDate, millisUntilDay());
@@ -80,8 +101,17 @@
     if (currentTheme) {
       var body = document.querySelector('body');
       var main = document.querySelector('main');
+
+      // Turn on transitions
+      body.classList.add('transition');
+      // Change colours
       body.style.backgroundColor = getThemeBackground();
       main.style.color = getThemeText();
+
+      // Remove transition class after 10 seconds
+      setTimeout(function() {
+        body.classList.remove('transition');
+      }, 10000);
     }
   }
 
@@ -129,30 +159,6 @@
   }
 
   /**
-   * Converts Date object to a friendlier time string
-   */
-  function toTimeString(time) {
-    var hours = time.getHours().toString();
-    if (hours > 12)
-      hours = hours % 12;
-    if (hours < 10)
-      hours = '0' + hours;
-    var minutes = time.getMinutes().toString();
-    if (minutes < 10)
-      minutes = '0' + minutes;
-    var amPm = time.getHours() % 12 == time.getHours() ? 'am' : 'pm';
-
-    return hours + ':' + minutes + '<sub>' + amPm + '</sub>';
-  }
-
-  /**
-   * Converts Date object to frientlier time string
-   */
-  function toDateString(time) {
-    return days[time.getDay()] + ', ' + time.getDate() + ' ' + months[time.getMonth()];
-  }
-
-  /**
    * Change the theme to be used
    */
   function changeTheme(themeName) {
@@ -192,6 +198,17 @@
 
     // Update theme so it is displayed
     updateTheme();
+  }
+
+  /**
+   * Hide the dropdown if it's there
+   */
+  function hideDropdown() {
+    var dropdown = document.querySelector('div.dropdown');
+    if (dropdown) {
+      dropdown.parentNode.removeChild(dropdown);
+      return true;
+    }
   }
 
   /**
@@ -273,17 +290,6 @@
     themeList.appendChild(newTheme);
 
     document.querySelector('body').appendChild(dropdown);
-  }
-
-  /**
-   * Hide the dropdown if it's there
-   */
-  function hideDropdown() {
-    var dropdown = document.querySelector('div.dropdown');
-    if (dropdown) {
-      dropdown.parentNode.removeChild(dropdown);
-      return true;
-    }
   }
 
   /**
