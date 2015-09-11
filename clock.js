@@ -5,7 +5,8 @@
   function initClock() {
     // Set theme and clock information
     changeTheme();
-    updateClock();
+    updateMinute();
+    updateHour();
     updateDate();
 
     // Add click handlers
@@ -22,6 +23,15 @@
   }
 
   /**
+   * Returns the number of milliseconds until the next hour
+   */
+  function millisUntilHour() {
+    var now = new Date();
+    var nextHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1);
+    return nextHour.getTime() - Date.now();
+  }
+
+  /**
    * Returns the number of milliseconds until the next day
    */
   function millisUntilDay() {
@@ -33,15 +43,13 @@
   /**
    * Updates the time displayed
    */
-  function updateClock() {
+  function updateMinute() {
     // Update time
-    var clock = document.querySelector('.clock');
-    var now = new Date();
-    clock.innerHTML = toTimeString(now);
-
-    // Turn on transitions
-    var body = document.querySelector('body');
-    body.classList.add('transition');
+    var minute = document.querySelector('.clock .minute');
+    var mins = new Date().getMinutes().toString();
+    if (mins < 10)
+      mins = '0' + mins;
+    minute.textContent = mins;
 
     // Update theme
     // Make sure theme still exists
@@ -51,13 +59,26 @@
       console.warn('Unable to update theme. Was it deleted?');
     }
 
-    // Remove transition class after 10 seconds
-    setTimeout(function() {
-      body.classList.remove('transition');
-    }, 10000);
-
     // Set clock to update mext minute
-    setTimeout(updateClock, millisUntilMin());
+    setTimeout(updateMinute, millisUntilMin());
+  }
+
+  function updateHour() {
+    // Update time
+    var hour = document.querySelector('.clock .hour');
+    var hrs = new Date().getHours().toString();
+    if (hrs > 12)
+      hrs = hrs % 12;
+    if (hrs < 10)
+      hrs = '0' + hrs;
+    hour.textContent = hrs;
+
+    var indicator = document.querySelector('.clock sub');
+    var amPm = new Date().getHours() % 12 == new Date().getHours() ? 'am' : 'pm';
+    indicator.textContent = amPm;
+
+    // Set clock to update mext hour
+    setTimeout(updateHour, millisUntilHour());
   }
 
   /**
@@ -67,7 +88,7 @@
     // Update date text
     var date = document.querySelector('.date');
     var now = new Date();
-    date.innerHTML = toDateString(now);
+    date.innerHTML = days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()];
 
     // Schedule next update
     setTimeout(updateDate, millisUntilDay());
@@ -76,12 +97,26 @@
   /**
    * Change styles according to the currently selected theme
    */
-  function updateTheme() {
+  function updateTheme(doTransition) {
+    if (typeof doTransition === 'undefined')
+      doTransition = true;
+
     if (currentTheme) {
       var body = document.querySelector('body');
       var main = document.querySelector('main');
+
+      // Turn on transitions
+      if (doTransition)
+        body.classList.add('transition');
+      // Change colours
       body.style.backgroundColor = getThemeBackground();
       main.style.color = getThemeText();
+
+      // Remove transition class after 10 seconds
+      if (doTransition)
+        setTimeout(function() {
+          body.classList.remove('transition');
+        }, 10000);
     }
   }
 
@@ -129,30 +164,6 @@
   }
 
   /**
-   * Converts Date object to a friendlier time string
-   */
-  function toTimeString(time) {
-    var hours = time.getHours().toString();
-    if (hours > 12)
-      hours = hours % 12;
-    if (hours < 10)
-      hours = '0' + hours;
-    var minutes = time.getMinutes().toString();
-    if (minutes < 10)
-      minutes = '0' + minutes;
-    var amPm = time.getHours() % 12 == time.getHours() ? 'am' : 'pm';
-
-    return hours + ':' + minutes + '<sub>' + amPm + '</sub>';
-  }
-
-  /**
-   * Converts Date object to frientlier time string
-   */
-  function toDateString(time) {
-    return days[time.getDay()] + ', ' + time.getDate() + ' ' + months[time.getMonth()];
-  }
-
-  /**
    * Change the theme to be used
    */
   function changeTheme(themeName) {
@@ -161,19 +172,11 @@
 
     // If theme not set yet, try getting out of storage
     if (!(currentTheme || themeName)) {
-      if (chrome.storage) {
-        // Get stored data
-        chrome.storage.local.get(['theme', 'customThemes'], function(items) {
-          // If custom themes are stored, add them
-          if (items.customThemes)
-            customThemes = items.customThemes;
-          // If current theme is stored, set the theme
-          if (items.theme)
-            changeTheme(items.theme);
-          else
-            changeTheme('plain');
-        });
-        return;
+
+      if (localStorage) {
+        customThemes = JSON.parse(localStorage.getItem('customThemes')) || {};
+
+        themeName = localStorage.getItem('theme') || 'plain';
       }
     }
 
@@ -184,14 +187,23 @@
     currentTheme = themeName;
 
     // If storage is available, store current theme
-    if (chrome.storage) {
-      chrome.storage.local.set({
-        'theme': currentTheme
-      });
+    if (localStorage) {
+      localStorage.setItem('theme', currentTheme);
     }
 
     // Update theme so it is displayed
-    updateTheme();
+    updateTheme(false);
+  }
+
+  /**
+   * Hide the dropdown if it's there
+   */
+  function hideDropdown() {
+    var dropdown = document.querySelector('div.dropdown');
+    if (dropdown) {
+      dropdown.parentNode.removeChild(dropdown);
+      return true;
+    }
   }
 
   /**
@@ -206,9 +218,9 @@
     var dropdown = document.createElement('div');
     dropdown.classList.add('dropdown');
     dropdown.innerHTML = '<h2>Themes</h2>';
-    // Show non-saving warning if chrome.storage isn't available
-    if (!chrome.storage)
-      dropdown.innerHTML += '<p>Saved setting and themes are available if you use the Chrome App</p><p>Currently the only way to get it is to clone via GitHub, and add it yourself in the Extensions settings page</p>';
+    // Show non-saving warning if Storage API isn't available
+    if (!localStorage)
+      dropdown.innerHTML += '<p>Saved setting and themes are available if you use an updated browser.</p>';
 
     // Add a list for themes
     var themeList = document.createElement('ul');
@@ -254,10 +266,8 @@
       // Remove theme if button clicked
       removeButton.addEventListener('click', function() {
         delete customThemes[key];
-        if (chrome.storage)
-          chrome.storage.local.set({
-            'customThemes': customThemes
-          });
+        if (localStorage)
+          localStorage.setItem('customThemes', JSON.stringify(customThemes));
 
         // Hide and re-show dropdown to refresh list
         hideDropdown();
@@ -276,17 +286,6 @@
   }
 
   /**
-   * Hide the dropdown if it's there
-   */
-  function hideDropdown() {
-    var dropdown = document.querySelector('div.dropdown');
-    if (dropdown) {
-      dropdown.parentNode.removeChild(dropdown);
-      return true;
-    }
-  }
-
-  /**
    * Show dropdown for the creation of a new theme
    */
   function showNewThemeDropdown() {
@@ -298,9 +297,9 @@
     dropdown.classList.add('dropdown');
     dropdown.innerHTML = '<h2>New Theme</h2>';
 
-    // Add warning for lack of chrome.storage
-    if (!chrome.storage)
-      dropdown.innerHTML += '<p><strong>Changes made here won\'t be kept if you\'re using a web browser and close it.</strong></p>';
+    // Add warning for lack of Storage
+    if (!localStorage)
+      dropdown.innerHTML += '<p><strong>Changes made here won\'t be kept. Please update your browser.</strong></p>';
 
     // Add CSS colour reference link
     dropdown.innerHTML += '<p>Colors must be in a valid CSS format. Some examples can be found on the <a href="https://developer.mozilla.org/en/docs/Web/CSS/color_value#Color_keywords">Mozilla Developer Network</a></p>';
@@ -336,10 +335,8 @@
         background: [dropdown.querySelector('.bgcolor').value]
       };
       // Add to storage if available
-      if (chrome.storage)
-        chrome.storage.local.set({
-          'customThemes': customThemes
-        });
+      if (localStorage)
+        localStorage.setItem('customThemes', JSON.stringify(customThemes));
 
       // Hide dropdown and change theme
       hideDropdown();
@@ -381,11 +378,10 @@
       // Pick random ID
       var id = Math.floor(Math.random() * 10000);
       customThemes[id] = JSON.parse(dropdown.querySelector('.json').value);
+
       // Store, if storage available
-      if (chrome.storage)
-        chrome.storage.local.set({
-          'customThemes': customThemes
-        });
+      if (localStorage)
+        localStorage.setItem('customThemes', JSON.stringify(customThemes));
 
       // Change theme
       hideDropdown();
