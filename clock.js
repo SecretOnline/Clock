@@ -97,21 +97,26 @@
   /**
    * Change styles according to the currently selected theme
    */
-  function updateTheme() {
+  function updateTheme(doTransition) {
+    if (typeof doTransition === 'undefined')
+      doTransition = true;
+
     if (currentTheme) {
       var body = document.querySelector('body');
       var main = document.querySelector('main');
 
       // Turn on transitions
-      body.classList.add('transition');
+      if (doTransition)
+        body.classList.add('transition');
       // Change colours
       body.style.backgroundColor = getThemeBackground();
       main.style.color = getThemeText();
 
       // Remove transition class after 10 seconds
-      setTimeout(function() {
-        body.classList.remove('transition');
-      }, 10000);
+      if (doTransition)
+        setTimeout(function() {
+          body.classList.remove('transition');
+        }, 10000);
     }
   }
 
@@ -187,7 +192,7 @@
     }
 
     // Update theme so it is displayed
-    updateTheme();
+    updateTheme(false);
   }
 
   /**
