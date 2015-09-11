@@ -167,19 +167,11 @@
 
     // If theme not set yet, try getting out of storage
     if (!(currentTheme || themeName)) {
-      if (chrome.storage) {
-        // Get stored data
-        chrome.storage.local.get(['theme', 'customThemes'], function(items) {
-          // If custom themes are stored, add them
-          if (items.customThemes)
-            customThemes = items.customThemes;
-          // If current theme is stored, set the theme
-          if (items.theme)
-            changeTheme(items.theme);
-          else
-            changeTheme('plain');
-        });
-        return;
+
+      if (localStorage) {
+        customThemes = JSON.parse(localStorage.getItem('customThemes')) || {};
+
+        themeName = localStorage.getItem('theme') || 'plain';
       }
     }
 
@@ -190,10 +182,8 @@
     currentTheme = themeName;
 
     // If storage is available, store current theme
-    if (chrome.storage) {
-      chrome.storage.local.set({
-        'theme': currentTheme
-      });
+    if (localStorage) {
+      localStorage.setItem('theme', currentTheme);
     }
 
     // Update theme so it is displayed
@@ -223,9 +213,9 @@
     var dropdown = document.createElement('div');
     dropdown.classList.add('dropdown');
     dropdown.innerHTML = '<h2>Themes</h2>';
-    // Show non-saving warning if chrome.storage isn't available
-    if (!chrome.storage)
-      dropdown.innerHTML += '<p>Saved setting and themes are available if you use the Chrome App</p><p>Currently the only way to get it is to clone via GitHub, and add it yourself in the Extensions settings page</p>';
+    // Show non-saving warning if Storage API isn't available
+    if (!localStorage)
+      dropdown.innerHTML += '<p>Saved setting and themes are available if you use an updated browser.</p>';
 
     // Add a list for themes
     var themeList = document.createElement('ul');
@@ -271,10 +261,8 @@
       // Remove theme if button clicked
       removeButton.addEventListener('click', function() {
         delete customThemes[key];
-        if (chrome.storage)
-          chrome.storage.local.set({
-            'customThemes': customThemes
-          });
+        if (localStorage)
+          localStorage.setItem('customThemes', JSON.stringify(customThemes));
 
         // Hide and re-show dropdown to refresh list
         hideDropdown();
@@ -304,9 +292,9 @@
     dropdown.classList.add('dropdown');
     dropdown.innerHTML = '<h2>New Theme</h2>';
 
-    // Add warning for lack of chrome.storage
-    if (!chrome.storage)
-      dropdown.innerHTML += '<p><strong>Changes made here won\'t be kept if you\'re using a web browser and close it.</strong></p>';
+    // Add warning for lack of Storage
+    if (!localStorage)
+      dropdown.innerHTML += '<p><strong>Changes made here won\'t be kept. Please update your browser.</strong></p>';
 
     // Add CSS colour reference link
     dropdown.innerHTML += '<p>Colors must be in a valid CSS format. Some examples can be found on the <a href="https://developer.mozilla.org/en/docs/Web/CSS/color_value#Color_keywords">Mozilla Developer Network</a></p>';
@@ -342,10 +330,8 @@
         background: [dropdown.querySelector('.bgcolor').value]
       };
       // Add to storage if available
-      if (chrome.storage)
-        chrome.storage.local.set({
-          'customThemes': customThemes
-        });
+      if (localStorage)
+        localStorage.setItem('customThemes', JSON.stringify(customThemes));
 
       // Hide dropdown and change theme
       hideDropdown();
@@ -387,11 +373,10 @@
       // Pick random ID
       var id = Math.floor(Math.random() * 10000);
       customThemes[id] = JSON.parse(dropdown.querySelector('.json').value);
+
       // Store, if storage available
-      if (chrome.storage)
-        chrome.storage.local.set({
-          'customThemes': customThemes
-        });
+      if (localStorage)
+        localStorage.setItem('customThemes', JSON.stringify(customThemes));
 
       // Change theme
       hideDropdown();
